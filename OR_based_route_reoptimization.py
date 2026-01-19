@@ -1,6 +1,7 @@
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 import numpy as np
 from route_analytics import *
+from customer_data import cust_list
 
 def create_single_vehicle_data(customers, distance_matrix, route_customers):
     data = {}
@@ -124,32 +125,18 @@ WEIGHTS = {
     "weather": 1
 }
 
-customers = [
-    {"priority": 1.0, "service_time": 0,  "weather": 0,   "pallets": 0},  # depot
-    {"priority": 0.95, "service_time": 15, "weather": 0.1, "pallets": 10},
-    {"priority": 0.90, "service_time": 20, "weather": 0.2, "pallets": 15},
-    {"priority": 0.92, "service_time": 10, "weather": 0.3, "pallets": 12},
-    {"priority": 0.85, "service_time": 25, "weather": 0.2, "pallets": 18},
-    {"priority": 0.75, "service_time": 30, "weather": 0.4, "pallets": 20},
-    {"priority": 0.70, "service_time": 10, "weather": 0.1, "pallets": 10},
-    {"priority": 0.65, "service_time": 15, "weather": 0.2, "pallets": 8},
-    {"priority": 0.60, "service_time": 20, "weather": 0.3, "pallets": 25},
-    {"priority": 0.50, "service_time": 10, "weather": 0.1, "pallets": 8},
-    {"priority": 0.45, "service_time": 10, "weather": 0.4, "pallets": 5},
-    {"priority": 0.35, "service_time": 10, "weather": 0.3, "pallets": 6},
-]
-
+customers = cust_list
 np.random.seed(7)
 
-distance_matrix = np.random.randint(8, 35, size=(12,12)).tolist()
-for i in range(12):
+distance_matrix = np.random.randint(8, 35, size=(15,15)).tolist()
+for i in range(15):
     distance_matrix[i][i] = 0
 
 
 assigned_routes = {
     "Vehicle-1": [0, 1, 5, 9, 11],
-    "Vehicle-2": [0, 2, 6, 10],
-    "Vehicle-3": [0, 3, 4, 7, 8]
+    "Vehicle-2": [0, 2, 6, 10, 12],
+    "Vehicle-3": [0, 3, 4, 7, 8, 13]
 }
 
 optimized_routes = optimize_all_routes(
@@ -161,8 +148,6 @@ optimized_routes = optimize_all_routes(
 
 for v, r in optimized_routes.items():
     print(v, "→", r)
-
-
 
 
 # route_map = visualize_routes(assigned_routes, optimized_routes, customers)
