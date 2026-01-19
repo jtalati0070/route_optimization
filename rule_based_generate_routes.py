@@ -1,4 +1,5 @@
 import numpy as np
+from customer_data import cust_list
 
 def compute_score(current, candidate, distance_matrix, customers, W):
     """
@@ -37,7 +38,6 @@ def balanced_assignment(customers, vehicle_count):
     high = customer_list[: n // 3]
     medium = customer_list[n // 3 : 2 * n // 3]
     low = customer_list[2 * n // 3 :]
-    print(high, medium, low)
 
     # Round robin assignment
     vehicle_customers = [[] for _ in range(vehicle_count)]
@@ -71,13 +71,9 @@ def build_route(customer_ids, customers, distance_matrix, W, vehicle_capacity=80
         best, best_score = None, float("-inf")
 
         for cand in remaining:
-            print(f"remaining candidates == {cand}, {distance_matrix[current][cand]}")
             travel_time = distance_matrix[current][cand]
-            print(f"travel time == {cand}, {travel_time}")
             service_time = customers[cand]["service_time"]
-            print(f"service time == {cand}, {service_time}")
             pallets = customers[cand]["pallets"]
-            print(f"pallets == {cand}, {pallets}")
 
             if time_used + travel_time + service_time > max_minutes:
                 continue
@@ -118,16 +114,15 @@ def existing_assignments():
 
 def rule_based_multi_vehicle(customers, distance_matrix, W, vehicle_count=3):
 
-    # assignments = balanced_assignment(customers, vehicle_count)
-    assigned_routes = existing_assignments()
-    existing_routes = [assigned_routes[key] for key in assigned_routes]
-    print(existing_routes)
+    assignments = balanced_assignment(customers, vehicle_count)
+    # assigned_routes = existing_assignments()
+    # assignments = [assigned_routes[key] for key in assigned_routes]
 
     results = []
 
     for v in range(vehicle_count):
         route, time_used, pallets = build_route(
-            existing_routes[v],
+            assignments[v],
             customers,
             distance_matrix,
             W
@@ -135,7 +130,7 @@ def rule_based_multi_vehicle(customers, distance_matrix, W, vehicle_count=3):
 
         results.append({
             "vehicle": v + 1,
-            "assigned_customers": existing_routes[v],
+            "assigned_customers": assignments[v],
             "route": route,
             "time_used": time_used,
             "pallets_used": pallets
@@ -149,27 +144,12 @@ def rule_based_multi_vehicle(customers, distance_matrix, W, vehicle_count=3):
 # Example Data (12 Customers)
 # ----------------------------------------------------------
 
-customers = [
-    {"priority": 1.0, "service_time": 0,  "weather": 0,   "pallets": 0},  # depot
-    {"priority": 0.95, "service_time": 15, "weather": 0.1, "pallets": 10},
-    {"priority": 0.90, "service_time": 20, "weather": 0.2, "pallets": 15},
-    {"priority": 0.92, "service_time": 10, "weather": 0.3, "pallets": 12},
-    {"priority": 0.85, "service_time": 25, "weather": 0.2, "pallets": 18},
-    {"priority": 0.75, "service_time": 30, "weather": 0.4, "pallets": 20},
-    {"priority": 0.70, "service_time": 10, "weather": 0.1, "pallets": 10},
-    {"priority": 0.65, "service_time": 15, "weather": 0.2, "pallets": 8},
-    {"priority": 0.60, "service_time": 20, "weather": 0.3, "pallets": 25},
-    {"priority": 0.50, "service_time": 10, "weather": 0.1, "pallets": 8},
-    {"priority": 0.45, "service_time": 10, "weather": 0.4, "pallets": 5},
-    {"priority": 0.35, "service_time": 10, "weather": 0.3, "pallets": 6},
-]
-
+customers = cust_list
 np.random.seed(10)
-distance_matrix = np.random.randint(7, 35, size=(13,13)).tolist()
-for i in range(13):
+distance_matrix = np.random.randint(7, 35, size=(15,15)).tolist()
+for i in range(15):
     distance_matrix[i][i] = 0
 time_matrix = distance_matrix
-print(f"distance matrix == {distance_matrix}")
 
 WEIGHTS = {
     "priority": 10,        # serve earlier
