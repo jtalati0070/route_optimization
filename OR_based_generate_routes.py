@@ -75,6 +75,7 @@ def create_routing_model(data, weights):
 def add_capacity_constraint(routing, manager, data):
     def demand_callback(from_idx):
         node = manager.IndexToNode(from_idx)
+        print(f"Node == {node}, customers node == {customers[manager.IndexToNode(from_idx)]}")
         return data["customers"][node]["pallets"]
 
     demand_cb = routing.RegisterUnaryTransitCallback(demand_callback)
@@ -160,7 +161,7 @@ customers = [
 np.random.seed(7)
 
 distance_matrix = np.random.randint(8, 35, size=(12,12)).tolist()
-for i in range(13):
+for i in range(12):
     distance_matrix[i][i] = 0
 
 assignments = balanced_assignment(customers, 3)
