@@ -153,12 +153,12 @@ for v, r in optimized_routes.items():
 route_map = visualize_routes(assigned_routes, optimized_routes, customers)
 print(route_map)
 #
-kpi_df = compare_kpis(assigned_routes, optimized_routes, customers, distance_matrix)
-print(kpi_df)
-
-eta_vehicle_1 = compute_eta_table(
-    optimized_routes["Vehicle-1"],
-    customers,
-    distance_matrix
-)
-print(eta_vehicle_1)
+# kpi_df = compare_kpis(assigned_routes, optimized_routes, customers, distance_matrix)
+# print(kpi_df)
+#
+# eta_vehicle_1 = compute_eta_table(
+#     optimized_routes["Vehicle-1"],
+#     customers,
+#     distance_matrix
+# )
+# print(eta_vehicle_1)
