@@ -1,4 +1,5 @@
 import numpy as np
+from customer_data import cust_list, distance_matr
 
 def route_cost(route, customers, distance_matrix, weights):
     cost = 0
@@ -80,43 +81,29 @@ WEIGHTS = {
     "weather": 1
 }
 
-customers = [
-    {"priority": 1.0, "service_time": 0,  "weather": 0,   "pallets": 0},  # depot
-    {"priority": 0.95, "service_time": 15, "weather": 0.1, "pallets": 10},
-    {"priority": 0.90, "service_time": 20, "weather": 0.2, "pallets": 15},
-    {"priority": 0.92, "service_time": 10, "weather": 0.3, "pallets": 12},
-    {"priority": 0.85, "service_time": 25, "weather": 0.2, "pallets": 18},
-    {"priority": 0.75, "service_time": 30, "weather": 0.4, "pallets": 20},
-    {"priority": 0.70, "service_time": 10, "weather": 0.1, "pallets": 10},
-    {"priority": 0.65, "service_time": 15, "weather": 0.2, "pallets": 8},
-    {"priority": 0.60, "service_time": 20, "weather": 0.3, "pallets": 25},
-    {"priority": 0.50, "service_time": 10, "weather": 0.1, "pallets": 8},
-    {"priority": 0.45, "service_time": 10, "weather": 0.4, "pallets": 5},
-    {"priority": 0.35, "service_time": 10, "weather": 0.3, "pallets": 6},
-]
-
-np.random.seed(7)
-
-distance_matrix = np.random.randint(8, 35, size=(12,12)).tolist()
-for i in range(13):
-    distance_matrix[i][i] = 0
-
-
+customers = cust_list
+distance_matrix = distance_matr
 
 existing_routes = {
     "Vehicle-1": [0, 1, 9, 5, 12],
-    "Vehicle-2": [0, 2, 10, 6],
+    "Vehicle-2": [0, 2, 10, 6, 13],
     "Vehicle-3": [0, 3, 4, 7, 11, 8]
 }
-new_customer_id = 13
-customers[13] = {
-    "priority": 0.85,
-    "service_time": 15,
-    "weather": 0.2,
-    "pallets": 12,
-    "lat": 12.965,
-    "lon": 77.605
-}
+print(distance_matrix)
+
+new_customer_id = 14
+customers.append({
+    "name": "Kroger",
+    "address": "4851 Legacy Dr, Frisco, TX 75034, United States",
+    "chain": "Kroger",
+    "lat": 33.233139,
+    "lon": -96.7767189,
+    "priority": 0.70,
+    "service_time": 50,
+    "weather": 0.9,
+    "pallets": 22
+})
+
 vehicle, updated_route, delta = insert_new_customer(
     existing_routes,
     new_customer_id,
