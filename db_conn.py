@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2 import pool
 from contextlib import contextmanager
 from typing import Any, List, Tuple, Optional
+from config import db_config
 
 
 class PostgresConnectionPool:
@@ -13,7 +14,7 @@ class PostgresConnectionPool:
         user: str,
         password: str,
         minconn: int = 1,
-        maxconn: int = 10,
+        maxconn: int = 100,
     ):
         self._pool = pool.ThreadedConnectionPool(
             minconn=minconn,
@@ -69,3 +70,19 @@ class PostgresClient:
 
                 conn.commit()
                 return result
+
+
+if __name__ == "__main__":
+
+    connection_pool = PostgresConnectionPool(
+        host=db_config.HOST,
+        port=db_config.PORT,
+        database=db_config.DATABASE,
+        user=db_config.USER,
+        password=db_config.PASSWORD
+    )
+    pg_client = PostgresClient(connection_pool)
+    query = "SELECT * from locinsights.customer where customer_name like '%WALMART%' limit 10"
+    res = pg_client.execute_query(query)
+    for i in res:
+        print(i)
