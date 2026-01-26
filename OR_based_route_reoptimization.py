@@ -116,49 +116,49 @@ def optimize_all_routes(assigned_routes, customers, distance_matrix, weights):
 
     return optimized
 
-
-WEIGHTS = {
-    "priority": 10,
-    "pallets": 9,
-    "distance": 5,
-    "service_time": 4,
-    "weather": 1
-}
-
-customers = cust_list
-np.random.seed(7)
-
-distance_matrix = np.random.randint(8, 35, size=(15,15)).tolist()
-for i in range(15):
-    distance_matrix[i][i] = 0
-
-
-assigned_routes = {
-    "Vehicle-1": [0, 1, 5, 9, 11],
-    "Vehicle-2": [0, 2, 6, 10, 12],
-    "Vehicle-3": [0, 3, 4, 7, 8, 13]
-}
-
-optimized_routes = optimize_all_routes(
-    assigned_routes,
-    customers,
-    distance_matrix,
-    WEIGHTS
-)
-
-for v, r in optimized_routes.items():
-    print(v, "→", r)
-
-
-route_map = visualize_routes(assigned_routes, optimized_routes, customers)
-print(route_map)
 #
-kpi_df = compare_kpis(assigned_routes, optimized_routes, customers, distance_matrix)
-print(kpi_df)
-
-eta_vehicle_1 = compute_eta_table(
-    optimized_routes["Vehicle-1"],
-    customers,
-    distance_matrix
-)
-print(eta_vehicle_1)
+# WEIGHTS = {
+#     "priority": 10,
+#     "pallets": 9,
+#     "distance": 5,
+#     "service_time": 4,
+#     "weather": 1
+# }
+#
+# customers = cust_list
+# np.random.seed(7)
+#
+# distance_matrix = np.random.randint(8, 35, size=(15,15)).tolist()
+# for i in range(15):
+#     distance_matrix[i][i] = 0
+#
+#
+# assigned_routes = {
+#     "Vehicle-1": [0, 1, 5, 9, 11],
+#     "Vehicle-2": [0, 2, 6, 10, 12],
+#     "Vehicle-3": [0, 3, 4, 7, 8, 13]
+# }
+#
+# optimized_routes = optimize_all_routes(
+#     assigned_routes,
+#     customers,
+#     distance_matrix,
+#     WEIGHTS
+# )
+#
+# for v, r in optimized_routes.items():
+#     print(v, "→", r)
+#
+#
+# route_map = visualize_routes(assigned_routes, optimized_routes, customers)
+# print(route_map)
+# #
+# kpi_df = compare_kpis(assigned_routes, optimized_routes, customers, distance_matrix)
+# print(kpi_df)
+#
+# eta_vehicle_1 = compute_eta_table(
+#     optimized_routes["Vehicle-1"],
+#     customers,
+#     distance_matrix
+# )
+# print(eta_vehicle_1)
