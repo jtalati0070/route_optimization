@@ -6,7 +6,7 @@ import pandas as pd
 # Route Visualization
 # ----------------------------------------------------------
 
-def visualize_routes(before_routes, after_routes, customers):
+def visualize_routes(before_routes, after_routes, customers, route_list):
     # Center map at depot
     depot = customers[0]
     m = folium.Map(location=[depot["lat"], depot["lon"]], zoom_start=12)
@@ -25,7 +25,7 @@ def visualize_routes(before_routes, after_routes, customers):
         color = colors[idx % len(colors)]
 
         coords = [
-            (customers[c]["lat"], customers[c]["lon"])
+            (customers[route_list.index(c)]["lat"], customers[route_list.index(c)]["lon"])
             for c in route
         ]
 
@@ -39,9 +39,9 @@ def visualize_routes(before_routes, after_routes, customers):
 
         for c in route:
             folium.CircleMarker(
-                location=(customers[c]["lat"], customers[c]["lon"]),
+                location=(customers[route_list.index(c)]["lat"], customers[route_list.index(c)]["lon"]),
                 radius=6,
-                popup=f"{vehicle} - {customers[c]['name']}",
+                popup=f"{vehicle} - {customers[route_list.index(c)]['name']}",
                 color=color,
                 fill=True
             ).add_to(before_group)
@@ -57,7 +57,7 @@ def visualize_routes(before_routes, after_routes, customers):
         color = colors[idx % len(colors)]
 
         coords = [
-            (customers[c]["lat"], customers[c]["lon"])
+            (customers[route_list.index(c)]["lat"], customers[route_list.index(c)]["lon"])
             for c in route
         ]
 
@@ -72,8 +72,8 @@ def visualize_routes(before_routes, after_routes, customers):
 
         for i, c in enumerate(route):
             folium.Marker(
-                location=(customers[c]["lat"], customers[c]["lon"]),
-                popup=f"{vehicle} - Stop {i} - {customers[c]['name']}",
+                location=(customers[route_list.index(c)]["lat"], customers[route_list.index(c)]["lon"]),
+                popup=f"{vehicle} - Stop {i} - {customers[route_list.index(c)]['name']}",
                 icon=folium.Icon(color="green", icon="ok-sign")
             ).add_to(after_group)
 

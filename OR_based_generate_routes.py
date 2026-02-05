@@ -2,34 +2,33 @@ from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 import numpy as np
 from customer_data import cust_list
 from config import config
-import itertools
 
-# # ----------------------------------------------------------
-# # Balanced Assignment (same as rule-based)
-# # ----------------------------------------------------------
-#
-# def balanced_assignment(customers, vehicle_count):
-#     customer_list = list(range(1, len(customers)))
-#     customer_list.sort(key=lambda cid: customers[cid]["priority"], reverse=True)
-#
-#     n = len(customer_list)
-#     high = customer_list[: n // 3]
-#     medium = customer_list[n // 3 : 2 * n // 3]
-#     low = customer_list[2 * n // 3 :]
-#
-#     vehicle_customers = [[] for _ in range(vehicle_count)]
-#
-#     def rr(group):
-#         v = 0
-#         for c in group:
-#             vehicle_customers[v % vehicle_count].append(c)
-#             v += 1
-#
-#     rr(high)
-#     rr(medium)
-#     rr(low)
-#
-#     return vehicle_customers
+# ----------------------------------------------------------
+# Balanced Assignment (same as rule-based)
+# ----------------------------------------------------------
+
+def balanced_assignment(customers, vehicle_count):
+    customer_list = list(range(1, len(customers)))
+    customer_list.sort(key=lambda cid: customers[cid]["priority"], reverse=True)
+
+    n = len(customer_list)
+    high = customer_list[: n // 3]
+    medium = customer_list[n // 3 : 2 * n // 3]
+    low = customer_list[2 * n // 3 :]
+
+    vehicle_customers = [[] for _ in range(vehicle_count)]
+
+    def rr(group):
+        v = 0
+        for c in group:
+            vehicle_customers[v % vehicle_count].append(c)
+            v += 1
+
+    rr(high)
+    rr(medium)
+    rr(low)
+
+    return vehicle_customers
 
 
 # ----------------------------------------------------------
@@ -48,15 +47,19 @@ def create_data_model(customers, distance_matrix):
     return data
 
 
-def create_routing_model(cust_df, customer_ids):
+def create_routing_model(data, weights):
     manager = pywrapcp.RoutingIndexManager(
-        len(customer_ids), 1, 0)
+        len(data["distance_matrix"]),
+        data["num_vehicles"],
+        data["depot"]
+    )
 
     routing = pywrapcp.RoutingModel(manager)
 
     def cost_callback(from_idx, to_idx):
-        i = customer_ids[manager.IndexToNode(to_idx)]
-        idx = index_map[i]
+        i = manager.IndexToNode(from_idx)
+        j = manager.IndexToNode(to_idx)
+        cust = data["customers"]
 
         cost = (
             weights["distance"] * data["distance_matrix"][i][j]

@@ -1,0 +1,44 @@
+[
+  {
+    "customer_name": "Walmart_new ",
+    "address": "1202 S Kirkwood Rd, Kirkwood, MO 63122, United States",
+    "latitude": 38.5631543,
+    "longitude": -90.4030029,
+    "primary_route": "USF6AO",
+    "primary_sequence": [
+      {
+        "customer_name": "walmart_new",
+        "lat":,
+        "long":,
+        "dwell_time"
+      },
+      {
+        "customer_name": "kroger",
+        "lat":,
+        "long":,
+        "dwell_time"
+      },
+      {
+        "customer_name": "walmart 1",
+        "lat":,
+        "long":,
+        "dwell_time"
+      }
+    ],
+    "secondary_route": "USF8BD",
+    "secondary_sequence": [
+      {
+        "customer_name": "kroger",
+        "lat":,
+        "long":,
+        "dwell_time"
+      },
+      {
+        "customer_name": "walmart_new",
+        "lat":,
+        "long":,
+        "dwell_time"
+      }
+    ]
+  }
+]

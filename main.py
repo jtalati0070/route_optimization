@@ -1,9 +1,7 @@
-# from OR_based_generate_routes import *
+from OR_based_single_route_op import *
 import h3
 import numpy as np
 import pandas as pd
-
-from OR_based_generate_routes import create_routing_model
 from db_conn import *
 from config import db_config
 
@@ -28,33 +26,10 @@ def execute_pg_query(query):
     return res
 
 
-def create_distance_matrix(route_cust_df):
-    """
-    Extract distance based on h3 hex cells.
-    :param route_cust_df: Dataframe having the customer ids and their h3 resolutions.
-    :return: the complete distance matrix
-    """
-    customers = route_cust_df["customer_id"].values
-    h3_cells = route_cust_df["h3_res"].values
-    n = len(customers)
-
-    distance_matrix = np.zeros((n, n))
-
-    for i in range (0, n):
-        for j in range (0, n):
-            if i == j:
-                continue
-            else:
-                dist = h3.grid_distance(h3_cells[i], h3_cells[j])
-                distance_matrix[i][j] = dist
-
-    return pd.DataFrame(distance_matrix, index=customers, columns=customers)
-
-
 def extract_top3_routes(df):
     top3_routes = (
         df.loc[df.groupby("route_id")["dist_km"].idxmin()]
-        .nsmallest(3, "dist_km")
+        .nsmallest(1, "dist_km")
     )
     return top3_routes
 
@@ -62,71 +37,78 @@ def extract_top3_routes(df):
 def extract_customer_list_from_route(route_id):
     route_query = f"select c.customer_id, c.h3_res_9, crm.route_id  from locinsights.customer_route_mapping crm join locinsights.customer c " \
                   f"on crm.customer_id = c.customer_id " \
-                  f"where crm.route_id = 'USF09V'--'{str(route_id)}'"
-    print(route_query)
+                  f"where crm.route_id = '{str(route_id)}' limit 10"
     result = execute_pg_query(route_query)
-    print(f"Result == {result}, \n type of result == {type(result)}")
     final_res = []
     for row in result:
-        print(f"row == {row}, \n type of row == {type(row)}")
         final_res.append({
             "customer_id": row[0],
             "h3_res": row[1]
         })
-
     return pd.DataFrame(final_res)
 
 
 def extract_new_customer_details(cust_df):
-    new_customer = {"customer_name": cust_df["customer_name"]}
-    new_customer["h3_res"] = h3.latlng_to_cell(cust_df["latitude"], cust_df["longitude"], 9)
+    new_customer = {"customer_name": cust_df["customer_name"], "customer_id": 2000,
+                    "h3_res": h3.latlng_to_cell(cust_df["latitude"], cust_df["longitude"], 9)}
     return pd.DataFrame(new_customer)
 
 
-def create_route(route_cust_df):
-    customer_ids = route_cust_df.index.toList()
-    create_routing_model(route_cust_df, customer_ids)
+def extract_route_dc(route_id):
+    dc_query = f"select distinct location_id, lat, lng from locinsights.planned_visit " \
+               f"where location_type not ilike '%customer%' and " \
+               f"route_id = '{str(route_id)}' limit 1"
+    result = execute_pg_query(dc_query)
+    final_res = {}
+    for row in result:
+        final_res['customer_id'] = int(row[0]),
+        final_res['h3_res'] = h3.latlng_to_cell(row[1], row[2], 9),
+        final_res['route_id'] = route_id
+    return pd.DataFrame(final_res)
 
 
 def re_optimization(customer_route_json):
     cust_df = pd.read_json(customer_route_json)
     new_customer = extract_new_customer_details(cust_df)
     nearest_cust_df = pd.DataFrame.from_records(cust_df['nearest_customers'].to_list()[0])
-    sorted_cust_df = nearest_cust_df.sort_values(by=['dist_km'], ascending=[False])
+    sorted_cust_df = nearest_cust_df.sort_values(by=['dist_km'], ascending=[True])
     top3_routes = extract_top3_routes(sorted_cust_df)
 
     routes = {}
+    i = 1
 
     for row in top3_routes.itertuples():
         route_id = row.route_id
-        route_cust_df = extract_customer_list_from_route(route_id)
+        route_cust_df = extract_customer_list_from_route(route_id) # combine all the data to dc in one single query
         route_cust_df = pd.concat([route_cust_df, new_customer], ignore_index=True)
-        dist_route_cust_df = create_distance_matrix(route_cust_df)
-        proposed_route = create_route(dist_route_cust_df)
+        dc_details = extract_route_dc(route_id)
+        route_cust_df = pd.concat([dc_details, route_cust_df], ignore_index=True)
+        route_cust_df = pd.concat([route_cust_df, dc_details], ignore_index=True)
+        route_cust_df["dwell_time"] = 33
+        route_cust_df["avg_pallets"] = 11
+        route_cust_df["format"] = 'S'
+        print(f"route cust df == {route_cust_df}")
+        proposed_route = reoptimize_all_routes(route_cust_df)
+        print(proposed_route)
+
+    return proposed_route
 
 
-
-
-
-
-
-
-
-if __name__ == "__main__":
-    temp_json = '''[
-      {
-        "customer_name": "Walmart ",
-        "address": "1202 S Kirkwood Rd, Kirkwood, MO 63122, United States",
-        "latitude": 38.5631543,
-        "longitude": -90.4030029,
-        "nearest_customers": [
-          {
-            "customer_id": 2003562112,
-            "customer_name": "WALMART SC #2694",
-            "route_id": "USF6AO",
-            "dist_km": 0.029869383967916503
-          }
-        ]
-      }
-    ]'''
-    re_optimization(temp_json)
+# if __name__ == "__main__":
+#     temp_json = '''[
+#       {
+#         "customer_name": "Walmart ",
+#         "address": "1202 S Kirkwood Rd, Kirkwood, MO 63122, United States",
+#         "latitude": 38.5631543,
+#         "longitude": -90.4030029,
+#         "nearest_customers": [
+#           {
+#             "customer_id": 2003562112,
+#             "customer_name": "WALMART SC #2694",
+#             "route_id": "USF6AO",
+#             "dist_km": 0.029869383967916503
+#           }
+#         ]
+#       }
+#     ]'''
+#     re_optimization(temp_json)
